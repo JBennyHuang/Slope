@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from slope.core import tensor
 from slope.core.tensor import Tensor
 import numpy as np
 
@@ -12,6 +11,19 @@ class UnaryOperationContext:
 class UnaryOperation:
     def __init__(self, tensor: Tensor) -> None:
         self.ctx = UnaryOperationContext(tensor)
+
+
+class Pos(UnaryOperation, Tensor):
+    def __new__(cls, tensor: Tensor) -> Tensor:
+        return Tensor.__new__(cls, tensor)
+
+    def __init__(self, tensor: Tensor) -> None:
+        super().__init__(tensor)
+
+    def grad(self, grad):
+        tensor = self.ctx.tensor
+
+        return tensor.grad(grad)
 
 
 class Neg(UnaryOperation, Tensor):

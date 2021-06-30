@@ -77,8 +77,8 @@ class Div(BinaryOperation, Tensor):
         tensor_right = self.ctx.tensor_right
 
         return (
-            tensor_left.grad(np.multiply(grad, tensor_right) / np.power(tensor_right, 2)),
-            tensor_right.grad(-np.multiply(tensor_left, grad) / np.power(tensor_right, 2))
+            tensor_left.grad(np.divide(np.multiply(grad, tensor_right), np.power(tensor_right, 2))),
+            tensor_right.grad(-np.divide(np.multiply(tensor_left, grad), np.power(tensor_right, 2)))
         )
 
 
@@ -99,6 +99,23 @@ class Matmul(BinaryOperation, Tensor):
         )
 
 
+class Pow(BinaryOperation, Tensor):
+    def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
+        return Tensor.__new__(cls, np.power(tensor_left, tensor_right))
+
+    def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
+        super().__init__(tensor_left, tensor_right)
+
+    def grad(self, grad):
+        tensor_left = self.ctx.tensor_left
+        tensor_right = self.ctx.tensor_right
+
+        return (
+            tensor_left.grad(np.multiply(np.multiply(tensor_right, np.power(tensor_left, tensor_right - 1)), grad)),
+            tensor_right.grad(np.multiply(np.multiply(np.log(tensor_left), np.power(tensor_left, tensor_right)), grad))
+        )
+
+
 class Max(BinaryOperation, Tensor):
     def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
         return Tensor.__new__(cls, np.maximum(tensor_left, tensor_right))
@@ -113,20 +130,6 @@ class Max(BinaryOperation, Tensor):
         mask = tensor_left < tensor_right
 
         return (
-            tensor_left.grad(~mask * grad),
-            tensor_right.grad(mask * grad)
+            tensor_left.grad(np.multiply(~mask, grad)),
+            tensor_right.grad(np.multiply(mask, grad))
         )
-
-# class Max(TensorBinaryOperation):
-#     def __init__(self, tensor_left, tensor_right):
-#         super().__init__(tensor_left, tensor_right)
-
-#     def eval(self):
-#         return np.maximum(self.tensor_left.eval(), self.tensor_right.eval())
-
-#     def grad(self, grad):
-#         mask = self.tensor_left.eval() < self.tensor_right.eval()
-#         return (
-#             ~mask * self.tensor_left.grad(grad),
-#             mask * self.tensor_right.grad(grad)
-#         )

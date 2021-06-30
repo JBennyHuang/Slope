@@ -35,20 +35,48 @@ if __name__ == '__main__':
     # print(x.grad)
     # print(y.grad)
 
-    a = torch.tensor([1., -2., -3.], requires_grad=True)
-    b = torch.tensor([0.], requires_grad=True)
+    # a = torch.tensor([-1., 2., -3.], requires_grad=True)
+    # b = torch.tensor(0., requires_grad=True)
 
-    y = torch.max(a, b)
+    # y = torch.max(a, b)
+
+    # y.backward(torch.tensor([1., 1., 1.]))
+
+    # print(a.grad)
+    # print(b.grad)
+
+    # a = slope.Tensor([-1., 2., -3.])
+    # b = slope.Tensor(0.)
+
+    # y = slope.Max(a, b)
+
+    # print(y)
+    # print(y.grad(np.array([1., 1., 1.])))
+
+    # EXP
+    a = torch.tensor([1., 2., 3.], requires_grad=True)
+    b = torch.tensor(2., requires_grad=True)
+    c = torch.tensor(3., requires_grad=True)
+    d = torch.tensor([3., 2., 1.], requires_grad=True)
+
+    # y = torch.pow(torch.add(torch.pow(a, b), d), c)
+    y = (a ** b + d) ** c
+    print(y)
 
     y.backward(torch.tensor([1., 1., 1.]))
 
     print(a.grad)
     print(b.grad)
+    print(c.grad)
+    print(d.grad)
 
-    a = slope.Tensor([1., -2., -3.])
-    b = slope.Tensor([0.])
+    a = slope.Tensor([1., 2., 3.])
+    b = slope.Tensor(2.)
+    c = slope.Tensor(3.)
+    d = slope.Tensor([3, 2, 1])
 
-    y = slope.Max(a, b)
+    # y = slope.Pow(slope.Add(slope.Pow(a, b), d), c)
+    y = (a ** b + d) ** c
 
     print(y)
     print(y.grad(np.array([1., 1., 1.])))
