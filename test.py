@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # ])
     # z = slope.Matmul(x, y)
 
-    # print(z.eval())
+    # print(z)
     # print(z.grad(np.ones((2, 3))))
 
     # x = torch.tensor([
@@ -35,23 +35,23 @@ if __name__ == '__main__':
     # print(x.grad)
     # print(y.grad)
 
-    # a = torch.tensor([1., -2., 3.], requires_grad=True)
-    # b = torch.tensor([0.], requires_grad=True)
+    a = torch.tensor([1., -2., -3.], requires_grad=True)
+    b = torch.tensor([0.], requires_grad=True)
 
-    # y = torch.max(a, b)
+    y = torch.max(a, b)
 
-    # y.backward(torch.tensor([1., 1., 1.]))
+    y.backward(torch.tensor([1., 1., 1.]))
 
-    # print(a.grad)
-    # print(b.grad)
+    print(a.grad)
+    print(b.grad)
 
-    # a = slope.Tensor([1., -2., 3.])
-    # b = slope.Tensor([0.])
+    a = slope.Tensor([1., -2., -3.])
+    b = slope.Tensor([0.])
 
-    # y = slope.Max(a, b)
+    y = slope.Max(a, b)
 
-    # print(y.eval())
-    # print(y.grad(np.array([1., 1., 1.])))
+    print(y)
+    print(y.grad(np.array([1., 1., 1.])))
 
     # x = slope.Tensor([
     #     [0., 0.],
@@ -75,16 +75,7 @@ if __name__ == '__main__':
     # l1 = slope.Matmul(x, W1)
     # l2 = slope.Matmul(l1, W2)
 
-    # loss = slope.Abs(slope.Sub(l2, y))
+    # loss = slope.Sub(l2, y)
 
-    # print(loss.eval())
-
+    # print(loss)
     # print(loss.grad(np.ones((4, 1))))
-
-    class Tensor(np.ndarray):
-        def __new__(cls, array):
-            return np.asarray(array).view(cls)
-
-    t = Tensor([[1, 2, 3], [1, 2, 3]])
-    add = np.add(t, t)
-    print(type(add))

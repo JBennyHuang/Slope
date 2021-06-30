@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-
-from numpy.lib.type_check import common_type
 from slope.core.tensor import Tensor
 import numpy as np
 
@@ -12,17 +10,16 @@ class BinaryOperationContext:
 
 
 class BinaryOperation:
-    def __init__(self) -> None:
-        self.ctx = None
+    def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
+        self.ctx = BinaryOperationContext(tensor_left, tensor_right)
 
 
-class Add(BinaryOperation):
-    def __init__(self) -> None:
-        super().__init__()
+class Add(BinaryOperation, Tensor):
+    def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
+        return Tensor.__new__(cls, np.add(tensor_left, tensor_right))
 
-    def eval(self, x, y):
-        self.ctx = BinaryOperationContext(x, y)
-        return np.add(x, y)
+    def __init__(self, tensor_left, tensor_right) -> None:
+        super().__init__(tensor_left, tensor_right)
 
     def grad(self, grad):
         tensor_left = self.ctx.tensor_left
@@ -34,82 +31,91 @@ class Add(BinaryOperation):
         )
 
 
-# class TensorBinaryOperation:
-#     def __init__(self, tensor_left, tensor_right):
-#         self.tensor_left = tensor_left
-#         self.tensor_right = tensor_right
+class Sub(BinaryOperation, Tensor):
+    def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
+        return Tensor.__new__(cls, np.subtract(tensor_left, tensor_right))
+
+    def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
+        super().__init__(tensor_left, tensor_right)
+
+    def grad(self, grad):
+        tensor_left = self.ctx.tensor_left
+        tensor_right = self.ctx.tensor_right
+
+        return (
+            tensor_left.grad(grad),
+            tensor_right.grad(-grad)
+        )
 
 
-# class Add(TensorBinaryOperation):
-#     def __init__(self, tensor_left, tensor_right):
-#         super().__init__(tensor_left, tensor_right)
+class Mul(BinaryOperation, Tensor):
+    def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
+        return Tensor.__new__(cls, np.multiply(tensor_left, tensor_right))
 
-#     def eval(self):
-#         return self.tensor_left.eval() + self.tensor_right.eval()
+    def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
+        super().__init__(tensor_left, tensor_right)
 
-#     def grad(self, grad):
-#         return self.tensor_left.grad(grad), self.tensor_right.grad(grad)
+    def grad(self, grad):
+        tensor_left = self.ctx.tensor_left
+        tensor_right = self.ctx.tensor_right
 
-
-# class Sub(TensorBinaryOperation):
-#     def __init__(self, tensor_left, tensor_right):
-#         super().__init__(tensor_left, tensor_right)
-
-#     def eval(self):
-#         return self.tensor_left.eval() - self.tensor_right.eval()
-
-#     def grad(self, grad):
-#         return self.tensor_left.grad(grad), -self.tensor_right.grad(grad)
+        return (
+            tensor_left.grad(np.multiply(grad, tensor_right)),
+            tensor_right.grad(np.multiply(tensor_left, grad))
+        )
 
 
-# class Mul(TensorBinaryOperation):
-#     def __init__(self, tensor_left, tensor_right):
-#         super().__init__(tensor_left, tensor_right)
+class Div(BinaryOperation, Tensor):
+    def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
+        return Tensor.__new__(cls, np.divide(tensor_left, tensor_right))
 
-#     def eval(self):
-#         return self.tensor_left.eval() * self.tensor_right.eval()
+    def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
+        super().__init__(tensor_left, tensor_right)
 
-#     def grad(self, grad):
-#         return (
-#             self.tensor_right.eval() * self.tensor_left.grad(grad),
-#             self.tensor_left.eval() * self.tensor_right.grad(grad)
-#         )
+    def grad(self, grad):
+        tensor_left = self.ctx.tensor_left
+        tensor_right = self.ctx.tensor_right
 
-
-# class Div(TensorBinaryOperation):
-#     def __init__(self, tensor_left, tensor_right):
-#         super().__init__(tensor_left, tensor_right)
-
-#     def eval(self):
-#         return self.tensor_left.eval() / self.tensor_right.eval()
-
-#     def grad(self, grad):
-#         return (
-#             self.tensor_right.eval() * self.tensor_left.grad(grad) /
-#             self.tensor_right.eval() ** 2,
-#             -self.tensor_left.eval() * self.tensor_right.grad(grad) /
-#             self.tensor_right.eval() ** 2
-#         )
+        return (
+            tensor_left.grad(np.multiply(grad, tensor_right) / np.power(tensor_right, 2)),
+            tensor_right.grad(-np.multiply(tensor_left, grad) / np.power(tensor_right, 2))
+        )
 
 
-# class Matmul(TensorBinaryOperation):
-#     def __init__(self, tensor_left, tensor_right):
-#         super().__init__(tensor_left, tensor_right)
+class Matmul(BinaryOperation, Tensor):
+    def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
+        return Tensor.__new__(cls, np.matmul(tensor_left, tensor_right))
 
-#     def eval(self):
-#         return np.matmul(self.tensor_left.eval(), self.tensor_right.eval())
+    def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
+        super().__init__(tensor_left, tensor_right)
 
-#     def grad(self, grad):
-#         # grad1 = grad @ np.swapaxes(t2, -1, -2)
-#         # grad2 = np.swapaxes(t1, -1, -2) @ grad
-#         t1 = np.swapaxes(self.tensor_left.eval(), -1, -2)
-#         t2 = np.swapaxes(self.tensor_right.eval(), -1, -2)
+    def grad(self, grad):
+        tensor_left = self.ctx.tensor_left
+        tensor_right = self.ctx.tensor_right
 
-#         return (
-#             self.tensor_left.grad(np.matmul(grad, t2)),
-#             self.tensor_right.grad(np.matmul(t1 , grad))
-#         )
+        return (
+            tensor_left.grad(np.matmul(grad, np.swapaxes(tensor_right, -1, -2))),
+            tensor_right.grad(np.matmul(np.swapaxes(tensor_left, -1, -2), grad))
+        )
 
+
+class Max(BinaryOperation, Tensor):
+    def __new__(cls, tensor_left: Tensor, tensor_right: Tensor) -> Tensor:
+        return Tensor.__new__(cls, np.maximum(tensor_left, tensor_right))
+
+    def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
+        super().__init__(tensor_left, tensor_right)
+
+    def grad(self, grad):
+        tensor_left = self.ctx.tensor_left
+        tensor_right = self.ctx.tensor_right
+
+        mask = tensor_left < tensor_right
+
+        return (
+            tensor_left.grad(~mask * grad),
+            tensor_right.grad(mask * grad)
+        )
 
 # class Max(TensorBinaryOperation):
 #     def __init__(self, tensor_left, tensor_right):
