@@ -1,69 +1,100 @@
 from dataclasses import dataclass
 from slope.core.tensor import Tensor
+from typing import Callable, Set, Any
 import numpy as np
 
 
 @dataclass
 class UnaryOperationContext:
     tensor: Tensor
+    grad: Callable[[Tensor, Tensor], Tensor]
 
 
 class UnaryOperation:
-    def __init__(self, tensor: Tensor) -> None:
-        self.ctx = UnaryOperationContext(tensor)
+    def __new__(cls, func: Callable[[Tensor, Tensor], Tensor], grad: Callable[[Tensor, Tensor], Tensor]) -> Any:
+        class Operation(Tensor):
+            def __new__(cls, tensor: Tensor) -> Tensor:
+                return super().__new__(cls, func(tensor))
+
+            def __init__(self, tensor: Tensor) -> None:
+                self.ctx = UnaryOperationContext(tensor, grad)
+
+            def keys(self) -> Set[int]:
+                keys = self.ctx.tensor.keys()
+
+                return keys
+
+            def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
+
+                if grad is None:
+                    grad = Tensor(np.ones(self.shape))
+
+                key = id(tensor)
+
+                grad = self.ctx.grad(self.ctx.tensor, grad)
+                keys = self.ctx.tensor.keys()
+
+                if key in keys:
+                    return self.ctx.tensor.grad(tensor, grad)
+                else:
+                    raise Exception('No gradients')
+
+        return Operation
 
 
-class Pos(UnaryOperation, Tensor):
-    def __new__(cls, tensor: Tensor) -> Tensor:
-        return Tensor.__new__(cls, tensor)
-
-    def __init__(self, tensor: Tensor) -> None:
-        super().__init__(tensor)
-
-    def grad(self, grad):
-        tensor = self.ctx.tensor
-
-        return tensor.grad(grad)
+def slope_pos(tensor):
+    return tensor
 
 
-class Neg(UnaryOperation, Tensor):
-    def __new__(cls, tensor: Tensor) -> Tensor:
-        return Tensor.__new__(cls, -tensor)
-
-    def __init__(self, tensor: Tensor) -> None:
-        super().__init__(tensor)
-
-    def grad(self, grad):
-        tensor = self.ctx.tensor
-
-        return tensor.grad(-grad)
+def slope_pos_grad(tensor, grad):
+    return grad
 
 
-class Abs(UnaryOperation, Tensor):
-    def __new__(cls, tensor: Tensor) -> Tensor:
-        return Tensor.__new__(cls, np.abs(tensor))
-
-    def __init__(self, tensor: Tensor) -> None:
-        super().__init__(tensor)
-
-    def grad(self, grad):
-        tensor = self.ctx.tensor
-
-        grad = grad.copy()
-        mask = tensor < 0
-        grad[mask] = -grad[mask]
-
-        return tensor.grad(-grad)
+pos = UnaryOperation(
+    slope_pos,
+    slope_pos_grad
+)
 
 
-class Exp(UnaryOperation, Tensor):
-    def __new__(cls, tensor: Tensor) -> Tensor:
-        return Tensor.__new__(cls, np.exp(tensor))
+def slope_neg(tensor):
+    return np.negative(tensor)
 
-    def __init__(self, tensor: Tensor) -> None:
-        super().__init__(tensor)
 
-    def grad(self, grad):
-        tensor = self.ctx.tensor
+def slope_neg_grad(tensor, grad):
+    return np.negative(grad)
 
-        return tensor.grad(np.exp(grad))
+
+neg = UnaryOperation(
+    slope_neg,
+    slope_neg_grad
+)
+
+
+def slope_abs(tensor):
+    return np.abs(tensor)
+
+
+def slope_abs_grad(tensor, grad):
+    mask = tensor < 0
+
+    return np.subtract(np.multiply(~mask, grad), np.multiply(mask, grad))
+
+
+abs = UnaryOperation(
+    slope_abs,
+    slope_abs_grad
+)
+
+
+def slope_exp(tensor):
+    return np.exp(tensor)
+
+
+def slope_exp_grad(tensor, grad):
+    return np.exp(grad)
+
+
+exp = UnaryOperation(
+    slope_exp,
+    slope_exp_grad
+)
