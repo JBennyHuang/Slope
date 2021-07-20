@@ -249,7 +249,3 @@ class TestMatmul(unittest.TestCase):
         self.assertTrue(np.all(b11_grad.round(5) == b12_grad.detach().numpy().round(5)))
         self.assertTrue(np.all(W21_grad.round(5) == W22_grad.detach().numpy().round(5)))
         self.assertTrue(np.all(b21_grad.round(5) == b22_grad.detach().numpy().round(5)))
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,6 +1,3 @@
-from typing import Any
-
-from torch.autograd import grad
 import slope
 import numpy as np
 import torch
@@ -218,3 +215,11 @@ if __name__ == '__main__':
     # print(s)
     # print(a.grad)
     # print(b.grad)
+
+    class Optimizer:
+        def __init__(self, parameters):
+            self.parameters = paremeters
+
+        def minimize(self, tensor):
+            for parameter in self.parameters:
+                pass

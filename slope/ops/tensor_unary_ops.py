@@ -22,12 +22,19 @@ class UnaryOperation:
             def keys(self) -> Set[int]:
                 keys = self.ctx.tensor.keys()
 
-                return keys
+                return keys.union([id(self)])
 
+            # TODO tail recursion optimization
             def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
 
                 if grad is None:
                     grad = Tensor(np.ones(self.shape))
+                else:
+                    try:
+                        grad = np.reshape(grad, (-1, ) + self.shape)
+                        grad = np.sum(grad, axis=0)
+                    except:
+                        raise Exception(f'gradient with shape {grad.shape} do not match tensor with shape {self.shape}')
 
                 key = id(tensor)
 
@@ -37,7 +44,7 @@ class UnaryOperation:
                 if key in keys:
                     return self.ctx.tensor.grad(tensor, grad)
                 else:
-                    raise Exception('No gradients')
+                    raise Exception(f'no gradient for tensor with id {key}')
 
         return Operation
 
@@ -97,4 +104,32 @@ def slope_exp_grad(tensor, grad):
 exp = UnaryOperation(
     slope_exp,
     slope_exp_grad
+)
+
+
+def slope_sin(tensor):
+    return np.sin(tensor)
+
+
+def slope_sin_grad(tensor, grad):
+    return np.cos(tensor)
+
+
+sin = UnaryOperation(
+    slope_sin,
+    slope_sin_grad
+)
+
+
+def slope_cos(tensor):
+    return np.cos(tensor)
+
+
+def slope_cos_grad(tensor, grad):
+    return np.negative(np.sin(tensor))
+
+
+cos = UnaryOperation(
+    slope_cos,
+    slope_cos_grad
 )

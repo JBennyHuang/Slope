@@ -1,6 +1,5 @@
 from __future__ import annotations
 import numpy as np
-from numpy.core.fromnumeric import shape
 import slope
 from typing import Set
 
@@ -12,18 +11,16 @@ class Tensor(np.ndarray):
     def keys(self) -> Set[int]:
         return set([id(self)])
 
+    # TODO tail recursion optimization
     def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
-        # TODO shape mismatch for broadcasting
-
         if grad is None:
             grad = Tensor(np.ones(self.shape))
-
-        for _ in range(len(grad.shape) - len(self.shape)):
-            grad = np.sum(grad, axis=0)
-
-        for dim in range(len(self.shape)):
-            if self.shape[dim] == 1:
-                grad = np.sum(grad, axis=dim, keepdims=True)
+        else:
+            try:
+                grad = np.reshape(grad, (-1, ) + self.shape)
+                grad = np.sum(grad, axis=0)
+            except:
+                raise Exception(f'gradient with shape {grad.shape} do not match tensor with shape {self.shape}')
 
         return grad
 

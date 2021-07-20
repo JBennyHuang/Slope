@@ -23,12 +23,19 @@ class BinaryOperation:
             def keys(self) -> Set[int]:
                 keys_left, keys_right = self.ctx.tensor_left.keys(), self.ctx.tensor_right.keys()
 
-                return keys_left.union(keys_right)
+                return keys_left.union(keys_right).union([id(self)])
 
+            # TODO tail recursion optimization
             def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
 
                 if grad is None:
                     grad = Tensor(np.ones(self.shape))
+                else:
+                    try:
+                        grad = np.reshape(grad, (-1, ) + self.shape)
+                        grad = np.sum(grad, axis=0)
+                    except:
+                        raise Exception(f'gradient with shape {grad.shape} do not match tensor with shape {self.shape}')
 
                 key = id(tensor)
 
@@ -36,13 +43,13 @@ class BinaryOperation:
                 keys_left, keys_right = self.ctx.tensor_left.keys(), self.ctx.tensor_right.keys()
 
                 if key in keys_left and key in keys_right:
-                    return self.ctx.tensor_left.grad(tensor, grad_left) + self.ctx.tensor_right.grad(tensor, grad_right)
+                    return np.add(self.ctx.tensor_left.grad(tensor, grad_left), self.ctx.tensor_right.grad(tensor, grad_right))
                 elif key in keys_left:
                     return self.ctx.tensor_left.grad(tensor, grad_left)
                 elif key in keys_right:
                     return self.ctx.tensor_right.grad(tensor, grad_right)
                 else:
-                    raise Exception('No gradients')
+                    raise Exception(f'no gradient for tensor with id {key}')
 
         return Operation
 
