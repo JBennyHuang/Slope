@@ -57,6 +57,7 @@ class BinaryOperation:
                 elif key in keys_right:
                     return self.ctx.tensor_right.grad(tensor, grad_right, grad_memo)
                 else:
+                    # TODO return zero
                     raise Exception(f'no gradient for tensor with id {key}')
 
         return Operation

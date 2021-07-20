@@ -51,6 +51,7 @@ class UnaryOperation:
                 if key in keys:
                     return self.ctx.tensor.grad(tensor, grad, grad_memo)
                 else:
+                    # TODO return zero
                     raise Exception(f'no gradient for tensor with id {key}')
 
         return Operation
