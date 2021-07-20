@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from slope.core.tensor import Tensor
-from typing import Callable, Tuple, Set, Any
+from typing import Callable, Tuple, Set, Dict, Union, Any
 import numpy as np
 
 
@@ -9,6 +9,7 @@ class BinaryOperationContext:
     tensor_left: Tensor
     tensor_right: Tensor
     grad: Callable[[Tensor, Tensor, Tensor], Tuple[Tensor, Tensor]]
+    keys: Tuple[Set[int], Set[int]]
 
 
 class BinaryOperation:
@@ -18,15 +19,13 @@ class BinaryOperation:
                 return super().__new__(cls, func(tensor_left, tensor_right))
 
             def __init__(self, tensor_left: Tensor, tensor_right: Tensor) -> None:
-                self.ctx = BinaryOperationContext(tensor_left, tensor_right, grad)
+                self.ctx = BinaryOperationContext(tensor_left, tensor_right, grad, (tensor_left.keys(), tensor_right.keys()))
 
             def keys(self) -> Set[int]:
-                keys_left, keys_right = self.ctx.tensor_left.keys(), self.ctx.tensor_right.keys()
-
-                return keys_left.union(keys_right).union([id(self)])
+                return set.union(*self.ctx.keys, set([id(self)]))
 
             # TODO tail recursion optimization
-            def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
+            def grad(self, tensor: Tensor, grad: Tensor = None, grad_memo: Dict[int, Union[Tensor, Tuple[Tensor, ...]]] = None) -> Tensor:
 
                 if grad is None:
                     grad = Tensor(np.ones(self.shape))
@@ -39,15 +38,24 @@ class BinaryOperation:
 
                 key = id(tensor)
 
-                grad_left, grad_right = self.ctx.grad(self.ctx.tensor_left, self.ctx.tensor_right, grad)
-                keys_left, keys_right = self.ctx.tensor_left.keys(), self.ctx.tensor_right.keys()
+                if not (grad_memo is None):
+                    key_self = id(self)
+
+                    if not (key_self in grad_memo):
+                        grad_memo[key_self] = self.ctx.grad(self.ctx.tensor_left, self.ctx.tensor_right, grad)
+
+                    grad_left, grad_right = grad_memo[key_self]
+                else:
+                    grad_left, grad_right = self.ctx.grad(self.ctx.tensor_left, self.ctx.tensor_right, grad)
+
+                keys_left, keys_right = self.ctx.keys
 
                 if key in keys_left and key in keys_right:
-                    return np.add(self.ctx.tensor_left.grad(tensor, grad_left), self.ctx.tensor_right.grad(tensor, grad_right))
+                    return np.add(self.ctx.tensor_left.grad(tensor, grad_left, grad_memo), self.ctx.tensor_right.grad(tensor, grad_right, grad_memo))
                 elif key in keys_left:
-                    return self.ctx.tensor_left.grad(tensor, grad_left)
+                    return self.ctx.tensor_left.grad(tensor, grad_left, grad_memo)
                 elif key in keys_right:
-                    return self.ctx.tensor_right.grad(tensor, grad_right)
+                    return self.ctx.tensor_right.grad(tensor, grad_right, grad_memo)
                 else:
                     raise Exception(f'no gradient for tensor with id {key}')
 

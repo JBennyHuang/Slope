@@ -1,7 +1,8 @@
 from __future__ import annotations
 import numpy as np
 import slope
-from typing import Set
+from typing import Set, Dict, Union, Tuple
+from abc import abstractmethod
 
 
 class Tensor(np.ndarray):
@@ -12,7 +13,8 @@ class Tensor(np.ndarray):
         return set([id(self)])
 
     # TODO tail recursion optimization
-    def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
+    @abstractmethod
+    def grad(self, tensor: Tensor, grad: Tensor = None, grad_memo: Dict[int, Union[Tensor, Tuple[Tensor, ...]]] = None) -> Tensor:
         if grad is None:
             grad = Tensor(np.ones(self.shape))
         else:

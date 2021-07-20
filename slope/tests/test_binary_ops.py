@@ -232,7 +232,7 @@ class TestMatmul(unittest.TestCase):
         W22 = torch.tensor(W2, requires_grad=True)
         b22 = torch.tensor(b2, requires_grad=True)
 
-        l12 = torch.maximum(torch.matmul(x2, W12) + b12, torch.tensor(0))
+        l12 = torch.max(torch.matmul(x2, W12) + b12, torch.tensor(0).double())
         l22 = torch.matmul(l12, W22) + b22
 
         z2 = torch.abs(l22 - y2)
@@ -249,3 +249,35 @@ class TestMatmul(unittest.TestCase):
         self.assertTrue(np.all(b11_grad.round(5) == b12_grad.detach().numpy().round(5)))
         self.assertTrue(np.all(W21_grad.round(5) == W22_grad.detach().numpy().round(5)))
         self.assertTrue(np.all(b21_grad.round(5) == b22_grad.detach().numpy().round(5)))
+
+    def test_matmul_4(self):
+        a = np.random.uniform(0, 1, (500, 1000))
+        b = np.random.uniform(0, 1, (1000, 1000))
+        c = np.random.uniform(0, 1, (1000, 500))
+
+        x1 = slope.tensor(a)
+        y1 = slope.tensor(b)
+        z1 = slope.tensor(c)
+        w1 = slope.matmul(slope.matmul(x1, y1), z1)
+
+        grad_memo = {}
+
+        x1_grad = w1.grad(x1, grad_memo=grad_memo)
+        y1_grad = w1.grad(y1, grad_memo=grad_memo)
+        z1_grad = w1.grad(z1, grad_memo=grad_memo)
+
+        x2 = torch.tensor(a, requires_grad=True)
+        y2 = torch.tensor(b, requires_grad=True)
+        z2 = torch.tensor(c, requires_grad=True)
+        w2 = torch.matmul(torch.matmul(x2, y2), z2)
+
+        w2.backward(torch.ones(500, 500))
+
+        x2_grad = x2.grad
+        y2_grad = y2.grad
+        z2_grad = z2.grad
+
+        self.assertTrue(np.all(w1.round(3) == w2.detach().detach().numpy().round(3)))
+        self.assertTrue(np.all(x1_grad.round(3) == x2_grad.detach().detach().numpy().round(3)))
+        self.assertTrue(np.all(y1_grad.round(3) == y2_grad.detach().detach().numpy().round(3)))
+        self.assertTrue(np.all(z1_grad.round(3) == z2_grad.detach().detach().numpy().round(3)))

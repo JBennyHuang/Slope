@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from slope.core.tensor import Tensor
-from typing import Callable, Set, Any
+from typing import Callable, Set, Dict, Union, Any, Tuple
 import numpy as np
 
 
@@ -8,6 +8,7 @@ import numpy as np
 class UnaryOperationContext:
     tensor: Tensor
     grad: Callable[[Tensor, Tensor], Tensor]
+    keys: Set[int]
 
 
 class UnaryOperation:
@@ -17,16 +18,13 @@ class UnaryOperation:
                 return super().__new__(cls, func(tensor))
 
             def __init__(self, tensor: Tensor) -> None:
-                self.ctx = UnaryOperationContext(tensor, grad)
+                self.ctx = UnaryOperationContext(tensor, grad, tensor.keys())
 
             def keys(self) -> Set[int]:
-                keys = self.ctx.tensor.keys()
-
-                return keys.union([id(self)])
+                return set.union(self.ctx.keys, set([id(self)]))
 
             # TODO tail recursion optimization
-            def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
-
+            def grad(self, tensor: Tensor, grad: Tensor = None, grad_memo: Dict[int, Union[Tensor, Tuple[Tensor, ...]]] = None) -> Tensor:
                 if grad is None:
                     grad = Tensor(np.ones(self.shape))
                 else:
@@ -38,11 +36,20 @@ class UnaryOperation:
 
                 key = id(tensor)
 
-                grad = self.ctx.grad(self.ctx.tensor, grad)
-                keys = self.ctx.tensor.keys()
+                if not (grad_memo is None):
+                    key_self = id(self)
+
+                    if not (key_self in grad_memo):
+                        grad_memo[key_self] = self.ctx.grad(self.ctx.tensor, grad)
+
+                    grad = grad_memo[key_self]
+                else:
+                    grad = self.ctx.grad(self.ctx.tensor, grad)
+
+                keys = self.ctx.keys
 
                 if key in keys:
-                    return self.ctx.tensor.grad(tensor, grad)
+                    return self.ctx.tensor.grad(tensor, grad, grad_memo)
                 else:
                     raise Exception(f'no gradient for tensor with id {key}')
 
