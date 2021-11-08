@@ -33,7 +33,7 @@ Automagic differentiation
 To run tests, run the following command
 
 ```bash
-  python3 -m unittest discover slope.tests
+  python3 -m unittest discover tests/
 ```
 
   
