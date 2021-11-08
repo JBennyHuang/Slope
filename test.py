@@ -1,8 +1,22 @@
 import slope
 import numpy as np
 import torch
+from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
+    domain = np.linspace(-2, 2, 100)
+    domain = slope.tensor(domain)
+    domain_sqrd = domain ** slope.tensor(3)
+    plt.plot(domain, domain_sqrd)
+    plt.plot(domain, domain_sqrd.grad(domain))
+    domain_sqrd_grad = domain_sqrd.grad(domain)
+    print(dir(domain_sqrd_grad))
+    print(type(domain_sqrd_grad))
+    print(domain_sqrd_grad.get_keys())
+    # plt.plot(domain, domain_sqrd.grad(domain).grad(domain))
+    plt.show()
+
+    print(domain_sqrd.grad_fn)
 
     # x = slope.Tensor([
     #     [2., 5., 2.],

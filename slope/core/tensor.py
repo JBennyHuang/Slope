@@ -1,28 +1,38 @@
 from __future__ import annotations
 import numpy as np
 import slope
-from typing import Set, Dict, Union, Tuple
-from abc import abstractmethod
+from typing import Set, Tuple
 
 
 class Tensor(np.ndarray):
     def __new__(cls, input_array) -> Tensor:
         return np.asarray(input_array).view(cls)
 
-    def keys(self) -> Set[int]:
+    def get_keys(self) -> Set[int]:
+        """get keys of tensors that compose this tensor
+
+        Returns:
+            Set[int]: set of keys of tensors that compose this tensor
+        """
         return set([id(self)])
 
-    # TODO tail recursion optimization
-    @abstractmethod
-    def grad(self, tensor: Tensor, grad: Tensor = None, grad_memo: Dict[int, Union[Tensor, Tuple[Tensor, ...]]] = None) -> Tensor:
+    def grad(self, tensor: Tensor, grad: Tensor = None) -> Tensor:
+        """compute the gradients for this tensor with respect to the tensor
+
+        Args:
+            tensor (Tensor): tensor to compute gradients with respect to
+            grad (Tensor, optional): provided gradients. Defaults to None.
+
+        Returns:
+            Tensor: gradients for this tensor with respect to the tensor
+        """
         if grad is None:
+            # default to ones if no gradients are provided
             grad = Tensor(np.ones(self.shape))
         else:
-            try:
-                grad = np.reshape(grad, (-1, ) + self.shape)
-                grad = np.sum(grad, axis=0)
-            except:
-                raise Exception(f'gradient with shape {grad.shape} do not match tensor with shape {self.shape}')
+            # try to broadcast grad to self
+            grad = np.reshape(grad, (-1, ) + self.shape)
+            grad = np.sum(grad, axis=0)
 
         return grad
 

@@ -27,9 +27,12 @@ class TestAdd(unittest.TestCase):
         x2_grad = x2.grad
         y2_grad = y2.grad
 
-        self.assertTrue(np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(x1_grad.round(5) == x2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(y1_grad.round(5) == y2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(
+            np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(x1_grad.round(
+            5) == x2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(y1_grad.round(
+            5) == y2_grad.detach().detach().numpy().round(5)))
 
 
 class TestBroadcasting(unittest.TestCase):
@@ -54,9 +57,12 @@ class TestBroadcasting(unittest.TestCase):
         x2_grad = x2.grad
         y2_grad = y2.grad
 
-        self.assertTrue(np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(x1_grad.round(5) == x2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(y1_grad.round(5) == y2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(
+            np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(x1_grad.round(
+            5) == x2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(y1_grad.round(
+            5) == y2_grad.detach().detach().numpy().round(5)))
 
     def test_broadcasting_2(self):
         a = np.random.uniform(0, 1, (5, 5))
@@ -78,9 +84,12 @@ class TestBroadcasting(unittest.TestCase):
         x2_grad = x2.grad
         y2_grad = y2.grad
 
-        self.assertTrue(np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(x1_grad.round(5) == x2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(y1_grad.round(5) == y2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(
+            np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(x1_grad.round(
+            5) == x2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(y1_grad.round(
+            5) == y2_grad.detach().detach().numpy().round(5)))
 
     def test_broadcasting_3(self):
         a = np.random.uniform(0, 1, (5, 5))
@@ -102,9 +111,12 @@ class TestBroadcasting(unittest.TestCase):
         x2_grad = x2.grad
         y2_grad = y2.grad
 
-        self.assertTrue(np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(x1_grad.round(5) == x2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(y1_grad.round(5) == y2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(
+            np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(x1_grad.round(
+            5) == x2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(y1_grad.round(
+            5) == y2_grad.detach().detach().numpy().round(5)))
 
     def test_broadcasting_4(self):
         a = np.random.uniform(0, 1, (5, 1, 4, 5))
@@ -126,9 +138,12 @@ class TestBroadcasting(unittest.TestCase):
         x2_grad = x2.grad
         y2_grad = y2.grad
 
-        self.assertTrue(np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(x1_grad.round(5) == x2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(y1_grad.round(5) == y2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(
+            np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(x1_grad.round(
+            5) == x2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(y1_grad.round(
+            5) == y2_grad.detach().detach().numpy().round(5)))
 
 
 class TestMatmul(unittest.TestCase):
@@ -154,9 +169,12 @@ class TestMatmul(unittest.TestCase):
         x2_grad = x2.grad
         y2_grad = y2.grad
 
-        self.assertTrue(np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(x1_grad.round(5) == x2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(y1_grad.round(5) == y2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(
+            np.all(z1.round(5) == z2.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(x1_grad.round(
+            5) == x2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(y1_grad.round(
+            5) == y2_grad.detach().detach().numpy().round(5)))
 
     def test_matmul_2(self):
         a = np.random.uniform(0, 1, (5, 10))
@@ -183,10 +201,14 @@ class TestMatmul(unittest.TestCase):
         y2_grad = y2.grad
         z2_grad = z2.grad
 
-        self.assertTrue(np.all(w1.round(5) == w2.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(x1_grad.round(5) == x2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(y1_grad.round(5) == y2_grad.detach().detach().numpy().round(5)))
-        self.assertTrue(np.all(z1_grad.round(5) == z2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(
+            np.all(w1.round(5) == w2.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(x1_grad.round(
+            5) == x2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(y1_grad.round(
+            5) == y2_grad.detach().detach().numpy().round(5)))
+        self.assertTrue(np.all(z1_grad.round(
+            5) == z2_grad.detach().detach().numpy().round(5)))
 
     def test_matmul_3(self):
         x = np.array([
@@ -245,39 +267,43 @@ class TestMatmul(unittest.TestCase):
         b22_grad = b22.grad
 
         self.assertTrue(np.all(z1.round(5) == z2.detach().numpy().round(5)))
-        self.assertTrue(np.all(W11_grad.round(5) == W12_grad.detach().numpy().round(5)))
-        self.assertTrue(np.all(b11_grad.round(5) == b12_grad.detach().numpy().round(5)))
-        self.assertTrue(np.all(W21_grad.round(5) == W22_grad.detach().numpy().round(5)))
-        self.assertTrue(np.all(b21_grad.round(5) == b22_grad.detach().numpy().round(5)))
+        self.assertTrue(np.all(W11_grad.round(
+            5) == W12_grad.detach().numpy().round(5)))
+        self.assertTrue(np.all(b11_grad.round(
+            5) == b12_grad.detach().numpy().round(5)))
+        self.assertTrue(np.all(W21_grad.round(
+            5) == W22_grad.detach().numpy().round(5)))
+        self.assertTrue(np.all(b21_grad.round(
+            5) == b22_grad.detach().numpy().round(5)))
 
-    def test_matmul_4(self):
-        a = np.random.uniform(0, 1, (500, 1000))
-        b = np.random.uniform(0, 1, (1000, 1000))
-        c = np.random.uniform(0, 1, (1000, 500))
+    # def test_matmul_4(self):
+    #     a = np.random.uniform(0, 1, (500, 1000))
+    #     b = np.random.uniform(0, 1, (1000, 1000))
+    #     c = np.random.uniform(0, 1, (1000, 500))
 
-        x1 = slope.tensor(a)
-        y1 = slope.tensor(b)
-        z1 = slope.tensor(c)
-        w1 = slope.matmul(slope.matmul(x1, y1), z1)
+    #     x1 = slope.tensor(a)
+    #     y1 = slope.tensor(b)
+    #     z1 = slope.tensor(c)
+    #     w1 = slope.matmul(slope.matmul(x1, y1), z1)
 
-        grad_memo = {}
+    #     grad_memo = {}
 
-        x1_grad = w1.grad(x1, grad_memo=grad_memo)
-        y1_grad = w1.grad(y1, grad_memo=grad_memo)
-        z1_grad = w1.grad(z1, grad_memo=grad_memo)
+    #     x1_grad = w1.grad(x1, grad_memo=grad_memo)
+    #     y1_grad = w1.grad(y1, grad_memo=grad_memo)
+    #     z1_grad = w1.grad(z1, grad_memo=grad_memo)
 
-        x2 = torch.tensor(a, requires_grad=True)
-        y2 = torch.tensor(b, requires_grad=True)
-        z2 = torch.tensor(c, requires_grad=True)
-        w2 = torch.matmul(torch.matmul(x2, y2), z2)
+    #     x2 = torch.tensor(a, requires_grad=True)
+    #     y2 = torch.tensor(b, requires_grad=True)
+    #     z2 = torch.tensor(c, requires_grad=True)
+    #     w2 = torch.matmul(torch.matmul(x2, y2), z2)
 
-        w2.backward(torch.ones(500, 500))
+    #     w2.backward(torch.ones(500, 500))
 
-        x2_grad = x2.grad
-        y2_grad = y2.grad
-        z2_grad = z2.grad
+    #     x2_grad = x2.grad
+    #     y2_grad = y2.grad
+    #     z2_grad = z2.grad
 
-        self.assertTrue(np.all(w1.round(3) == w2.detach().detach().numpy().round(3)))
-        self.assertTrue(np.all(x1_grad.round(3) == x2_grad.detach().detach().numpy().round(3)))
-        self.assertTrue(np.all(y1_grad.round(3) == y2_grad.detach().detach().numpy().round(3)))
-        self.assertTrue(np.all(z1_grad.round(3) == z2_grad.detach().detach().numpy().round(3)))
+    #     self.assertTrue(np.all(w1.round(3) == w2.detach().detach().numpy().round(3)))
+    #     self.assertTrue(np.all(x1_grad.round(3) == x2_grad.detach().detach().numpy().round(3)))
+    #     self.assertTrue(np.all(y1_grad.round(3) == y2_grad.detach().detach().numpy().round(3)))
+    #     self.assertTrue(np.all(z1_grad.round(3) == z2_grad.detach().detach().numpy().round(3)))
